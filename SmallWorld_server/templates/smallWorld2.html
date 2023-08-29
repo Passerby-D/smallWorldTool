@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小世界现象小助手</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+        }
+
+        @media screen and (max-width: 768px) {
+            .title {
+                flex-direction: column;
+                align-items: center;
+                padding: 10px;
+            }
+
+            .title-left, .title-right {
+                margin-bottom: 10px;
+            }
+        }
+
+        .title {
+            background-color: #007bff;
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .title-left {
+            flex:1;
+            display: flex;
+            align-items: center;
+        }
+
+        #greeting {
+            font-size: 18px;
+            margin-right: 15px;
+        }
+
+        a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+
+        h1 {
+            flex:1;
+            align-items: center;
+            text-align: center;
+            font-size: 28px;
+            margin: 0;
+        }
+
+        .title-right {
+            flex:1;
+            display: flex;
+            text-align: end;
+            align-items:center;
+        }
+
+        p {
+            font-size: 16px;
+            margin: 0;
+            margin-right: 10px;
+        }
+
+        #cardGroupSelect {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .title-right a {
+            background-color: #fff;
+            color: #007bff;
+            padding: 5px 10px;
+            border-radius: 3px;
+            text-decoration: none;
+        }
+
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        #searchButton {
+            padding: 12px 18px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #searchButton:hover {
+            background-color: #0056b3;
+        }
+
+        #pagination {
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+
+        #pagination button {
+            margin: 0 8px;
+            padding: 6px 12px;
+            background-color: #ccc;
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #pagination button:hover {
+            background-color: #aaa;
+        }
+
+        #result {
+            margin-top: 20px;
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .input-container input {
+            flex: 1;
+            height: 200%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .to {
+            flex:1;
+            justify-content: center;
+            display: flex; /* Add this to enable flexbox */
+            justify-content: center; /* Center content horizontally */
+            align-items: center; /* Center content vertically */
+        }
+
+        .output-container {
+            flex: 1;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.5;
+            display: flex; /* Add this to enable flexbox */
+            justify-content: center; /* Center content horizontally */
+            align-items: center; /* Center content vertically */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="title">
+        <div class="title-left">
+            <p id="greeting">你好</p>
+            <a href="http://127.0.0.1:5000/smallWorld2/logout">登出</a>
+        </div>
+        <h1>小世界现象小助手</h1>
+        <div class="title-right">
+            <p>请选择你的卡组</p>
+            <select id="cardGroupSelect"></select>
+            <a href="http://127.0.0.1:5000/smallWorld2/deckInput">添加卡组</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="input-container">
+            <input type="text" id="inputA" placeholder="输入手卡的怪兽">
+            <h3 class="to">→</h3>
+            <div class="output-container" id="outputContainerA">
+                <!-- Data fetched from server will be displayed here -->
+            </div>
+        </div>
+
+        <div class="center">
+            <button id="searchButton" onclick="fetchCardData()">智能搜索</button>
+        </div>
+
+        <div id="conclusion"></div>
+
+        <div id="result"></div>
+
+        <div id="pagination">
+            <button id="prevBtn" onclick="changePage(-1)" disabled>上一页</button>
+            <span id="pageInfo"></span>
+            <button id="nextBtn" onclick="changePage(1)" disabled>下一页</button>
+        </div>
+    </div>
+
+    <script>
+                // 获取欢迎语和登出链接
+        fetch('http://127.0.0.1:5000/smallWorld2/username')
+            .then(response => response.text())
+            .then(username => {
+                document.getElementById('greeting').textContent = `你好，${username}`;
+            })
+            .catch(error => {
+                console.error('Error fetching username:', error);
+            });
+
+        // 获取选择框内容
+        fetch('http://127.0.0.1:5000/smallWorld2/userData')
+            .then(response => response.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    const cardGroupSelect = document.getElementById('cardGroupSelect');
+                    data.forEach(cardGroup => {
+                        const option = document.createElement('option');
+                        option.value = cardGroup;
+                        option.textContent = cardGroup;
+                        cardGroupSelect.appendChild(option);
+                    });
+                } else {
+                    console.error('Invalid data structure:', data);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching user data:', error);
+            });
+
+
+        var currentPage = 1;
+        var pageSize = 1; // Number of items per page
+        var cachedData = null; // Variable to store fetched data
+
+        function fetchCardData() {
+            var valueA = document.getElementById("inputA").value;
+            var deck = document.getElementById("cardGroupSelect").value;
+
+            if (valueA.trim() === "" || deck.trim() === "") {
+                alert("请输入怪兽卡并选择卡组！");
+                return; // Stop further execution
+            }
+
+            var urlA = `http://127.0.0.1:5000/RightName/${valueA}/${deck}`;
+
+
+            fetch(urlA)
+                .then(response => response.text())
+                .then(dataA => {
+                    document.getElementById("outputContainerA").textContent = dataA;
+                })
+                .catch(error => {
+                    console.error("Error fetching data A:", error);
+                });
+
+
+            var url = `http://127.0.0.1:5000/card?cost=${valueA}&deck=${deck}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    cachedData = data; // Store fetched data
+                    if (typeof(cachedData) == 'string'){
+                        document.getElementById("conclusion").textContent = cachedData
+                        return
+                    }
+                    document.getElementById("conclusion").textContent = "可以检索到 " + cachedData[0]
+                    displayPage(currentPage);
+                    showPagination()
+                })
+                .catch(error => {
+                    console.error("Error fetching data:", error);
+                });
+        }
+
+
+        function displayPage(page) {
+            var resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "";
+
+            for (var item of cachedData[currentPage]){
+                var itemDiv = document.createElement("div");
+                itemDiv.textContent = item;
+                resultDiv.appendChild(itemDiv);
+            }
+
+
+            var pageInfo = document.getElementById("pageInfo");
+            pageInfo.textContent = `第${currentPage}页，共${Math.ceil(cachedData.length - 1)}页`;
+
+            updatePaginationButtons(cachedData.length);
+        }
+
+        function updatePaginationButtons(totalItems) {
+            var prevBtn = document.getElementById("prevBtn");
+            var nextBtn = document.getElementById("nextBtn");
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === cachedData.length - 1;
+        }
+
+        function changePage(change) {
+            currentPage += change;
+            displayPage(currentPage);
+        }
+
+        function showPagination() {
+            var paginationDiv = document.getElementById("pagination");
+            paginationDiv.style.display = "block"; // Show the pagination buttons
+        }
+
+
+    </script>
+</body>
+</html>
